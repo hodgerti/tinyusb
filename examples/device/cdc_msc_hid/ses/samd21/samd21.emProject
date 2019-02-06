@@ -26,6 +26,8 @@
       gcc_entry_point="Reset_Handler"
       link_use_linker_script_file="No"
       linker_memory_map_file="$(ProjectDir)/ATSAMD21G18A_MemoryMap.xml"
+      linker_output_format="bin"
+	  linker_post_build_command='bossac -e -w -v -R --port=COM6 Output/"$(Configuration)"/Exe/samd21.bin'
       linker_section_placement_file="flash_placement.xml"
       linker_section_placements_segments="FLASH RX 0x00000000 0x00080000;RAM RWX 0x20000000 0x00030000"
       macros="DeviceFamily=SAMD21;Target=ATSAMD21G18A;Placement=Flash;rootDir=../../../../..;asf4Dir=../../../../../hw/mcu/microchip/samd/asf4/samd21"
