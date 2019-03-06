@@ -16,6 +16,8 @@ CROSS_COMPILE = arm-none-eabi-
 
 include $(TOP)/hw/bsp/$(BOARD)/board.mk
 
+CC = gcov
+CC = callcatcher gcc
 CC = $(CROSS_COMPILE)gcc
 CXX = $(CROSS_COMPILE)g++
 LD = $(CROSS_COMPILE)ld
@@ -48,8 +50,9 @@ CFLAGS += \
 	-Wcast-align \
 	-Wno-error=lto-type-mismatch \
 	-ffunction-sections \
-	-fdata-sections
-
+	-fdata-sections \
+	-fprofile-arcs \
+	-ftest-coverage
 #Debugging/Optimization
 ifeq ($(DEBUG), 1)
   CFLAGS += -O0 -ggdb
@@ -88,6 +91,8 @@ OBJ = $(addprefix $(BUILD)/obj/, $(SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/obj/, $(SRC_S:.s=.o))
 
 all: $(BUILD)/$(BOARD)-firmware.bin
+
+gcov: gcov -b $(BUILD)/$(BOARD)-firmware.bin
 
 OBJ_DIRS = $(sort $(dir $(OBJ)))
 $(OBJ): | $(OBJ_DIRS)
