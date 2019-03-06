@@ -47,8 +47,10 @@
 // MACRO CONSTANT TYPEDEF PROTYPES
 //--------------------------------------------------------------------+
 void led_blinking_task(void);
+void led_toggle(void);
 
-extern void virtual_com_task(void);
+extern void virtual_cdc_task(void);
+extern void virtual_msc_task(void);
 extern void usb_hid_task(void);
 
 /*------------- MAIN -------------*/
@@ -63,10 +65,14 @@ int main(void)
     // tinyusb device task
     tud_task();
 
-    led_blinking_task();
+    // led_blinking_task();
 
 #if CFG_TUD_CDC
-    virtual_com_task();
+    virtual_cdc_task();
+#endif
+
+#if CFG_TUD_MSC
+    virtual_msc_task();
 #endif
 
 #if CFG_TUD_HID
@@ -81,13 +87,16 @@ int main(void)
 // USB CDC
 //--------------------------------------------------------------------+
 #if CFG_TUD_CDC
-void virtual_com_task(void)
+void virtual_cdc_task(void)
 {
   if ( tud_cdc_connected() )
   {
+    led_toggle();
     // connected and there are data available
     if ( tud_cdc_available() )
     {
+      led_toggle();
+
       uint8_t buf[64];
 
       // read and echo back
@@ -114,6 +123,30 @@ void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts)
   {
     // print initial message when connected
     tud_cdc_write_str("\r\nTinyUSB CDC MSC HID device example\r\n");
+  }
+}
+#endif
+
+#if CFG_TUD_MSC
+void virtual_msc_task(void)
+{
+  if ( tud_msc_ready() )
+  {
+    led_toggle();
+//
+//    uint8_t buf[64];
+//
+//    // read and echo back
+//    int32_t count = tud_msc_read10_cb(buf, sizeof(buf));
+//
+//    for(uint32_t i=0; i<count; i++)
+//    {
+//      tud_cdc_write_char(buf[i]);
+//
+//      if ( buf[i] == '\r' ) tud_cdc_write_char('\n');
+//    }
+//
+//    tud_cdc_write_flush();
   }
 }
 #endif
@@ -207,4 +240,12 @@ void led_blinking_task(void)
 
   board_led_control(led_state);
   led_state = 1 - led_state; // toggle
+}
+
+void led_toggle(void)
+{
+   static bool led_toggle_state = 0;
+
+   board_led_control(led_toggle_state);
+   led_toggle_state = 1 - led_toggle_state;
 }
